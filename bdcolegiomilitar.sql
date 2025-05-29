@@ -47,15 +47,12 @@ nome varchar(20),
 foreign key (id_nota) references nota(id_nota)
 );
 use colegiomilitar
--- 1. adicionar colunas de auditoria e status em todas as tabelas atuais
+
 ALTER TABLE diretor
   ADD COLUMN email VARCHAR(100),
   ADD COLUMN criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   ADD COLUMN atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   ADD COLUMN ativo BOOLEAN DEFAULT TRUE;
-
-
-
 
 ALTER TABLE clube
  
@@ -69,11 +66,7 @@ ALTER TABLE disciplina
   ADD COLUMN criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   ADD COLUMN atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
--- 2. novas entidades essenciais
 
--- ALUNO
-
--- MATRÍCULA (histórico / status de aluno por ano)
 CREATE TABLE matricula (
   id_matricula INT PRIMARY KEY AUTO_INCREMENT,
   id_aluno     INT NOT NULL,
@@ -87,12 +80,7 @@ CREATE TABLE matricula (
   FOREIGN KEY (id_turma) REFERENCES turma(id_turma)
 );
 
--- LANÇAMENTO DE NOTA
 
--- PRESENÇA
-
-
--- FARDAMENTO
 CREATE TABLE fardamento (
   id_farda    INT PRIMARY KEY AUTO_INCREMENT,
   tipo        VARCHAR(20) NOT NULL,
@@ -100,7 +88,7 @@ CREATE TABLE fardamento (
   criado_em   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ENTREGA DE FARDAS
+
 CREATE TABLE farda_aluno (
   id_farda_aluno INT PRIMARY KEY AUTO_INCREMENT,
   id_aluno       INT NOT NULL,
@@ -111,7 +99,7 @@ CREATE TABLE farda_aluno (
   FOREIGN KEY (id_farda) REFERENCES fardamento(id_farda)
 );
 
--- ASSOCIAÇÃO ALUNO-CLUBE
+
 CREATE TABLE clube_aluno (
   id_clube_aluno INT PRIMARY KEY AUTO_INCREMENT,
   id_aluno       INT NOT NULL,
@@ -124,11 +112,10 @@ CREATE TABLE clube_aluno (
 );
 
 
--- 1) remover coluna que você não quer mais
+
 ALTER TABLE aluno
   DROP COLUMN tfardamento;
 
--- 2) adicionar sexo
 ALTER TABLE aluno
   ADD COLUMN sexo CHAR(1) 
     CHECK (sexo IN ('M','F')) AFTER data_nasc;
@@ -143,21 +130,21 @@ ALTER TABLE aluno
 
 -- 1) Ajustar FARDAMENTO (já existe)
 ALTER TABLE fardamento
-  -- remover coluna errada
+  -- 
   DROP COLUMN id_aluno,
-  -- mudar tamanho pra 5 chars
+
   CHANGE COLUMN tamanho tamanho VARCHAR(5) NOT NULL,
-  -- adicionar PK auto-increment
+
   ADD COLUMN id_farda INT NOT NULL AUTO_INCREMENT FIRST,
-  -- definir tipo da peça
+ 
   ADD COLUMN tipo VARCHAR(20) NOT NULL AFTER id_farda,
-  -- coluna de auditoria
+  
   ADD COLUMN criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER tamanho,
-  -- recriar PK
+
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (id_farda);
 
--- 2) Criar Farda_Aluno (se ainda não existir)
+
 CREATE TABLE IF NOT EXISTS farda_aluno (
   id_farda_aluno INT PRIMARY KEY AUTO_INCREMENT,
   id_aluno       INT NOT NULL,
@@ -171,29 +158,27 @@ CREATE TABLE IF NOT EXISTS farda_aluno (
 );
 
 
--- 0) (Opcional) confirme o nome da FK  
-SHOW CREATE TABLE fardamento\G
 
--- 1) derrube a FK existente
+
 ALTER TABLE fardamento
   DROP FOREIGN KEY fardamento_ibfk_1;
 
--- 2) agora remova a coluna indesejada
+
 ALTER TABLE fardamento
   DROP COLUMN id_aluno;
 
--- 3) adicione o id_farda como PK auto-increment
+
 ALTER TABLE fardamento
   ADD COLUMN id_farda INT NOT NULL AUTO_INCREMENT FIRST,
   ADD PRIMARY KEY (id_farda);
 
--- 4) ajuste os demais campos
+
 ALTER TABLE fardamento
   MODIFY COLUMN tamanho VARCHAR(5) NOT NULL,
   ADD COLUMN tipo VARCHAR(20) NOT NULL AFTER tamanho,
   ADD COLUMN criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER tipo;
   
--- 5) então crie a tabela de associação
+
 CREATE TABLE IF NOT EXISTS farda_aluno (
   id_farda_aluno INT PRIMARY KEY AUTO_INCREMENT,
   id_aluno       INT NOT NULL,
