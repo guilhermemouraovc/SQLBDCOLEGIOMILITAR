@@ -188,9 +188,15 @@ CREATE TABLE IF NOT EXISTS farda_aluno (
   CONSTRAINT fk_fardaaluno_aluno FOREIGN KEY (id_aluno)
     REFERENCES aluno(id_aluno),
   CONSTRAINT fk_fardaaluno_fardamento FOREIGN KEY (id_farda)
-    REFERENCES fardamento(id_farda)
-);
+    REFERENCES fardamento(id_DELIMITER $$
+--Trigger
+CREATE TRIGGER trg_update_diretor_atualizado_em
+BEFORE UPDATE ON diretor
+FOR EACH ROW
+BEGIN
+  SET NEW.atualizado_em = NOW();
+END$$
 
-
+DELIMITER ;
 
 
