@@ -1,0 +1,100 @@
+-- Diretores
+INSERT INTO diretor (id_diretor,nome,cargo_militar,telefone,email,ativo)
+VALUES
+(1,'Cel. João Silva','Coronel','(81) 9999-0001','joao.silva@escola.mil.br',TRUE),
+(2,'Maj. Carla Oliveira','Major','(81) 9999-0002','carla.oliveira@escola.mil.br',TRUE),
+(3,'Cel. Teste','Capitão','(81) 90000-0000','teste@exemplo.com',TRUE);
+
+-- Turmas
+INSERT INTO turma (nome_turma,ano_escolar,turno,capacidade,id_diretor,ativo)
+VALUES
+('8º A','2025','Matutino',30,1,TRUE),
+('8º B','2025','Vespertino',28,1,TRUE),
+('9º A','2025','Matutino',32,2,TRUE);
+
+-- Responsáveis
+INSERT INTO responsavel (nome,parentesco,telefone,email,ativo)
+VALUES
+('Maria Santos','Mãe','8199990001','maria.santos@exemplo.com',TRUE),
+('Pedro Santos','Pai','8199990002','pedro.santos@exemplo.com',TRUE);
+
+-- Alunos
+INSERT INTO aluno (nome,data_nasc,sexo,id_turma,id_responsavel,ativo)
+VALUES
+('João Silva','2015-04-10','M',1,1,TRUE),
+('Maria Oliveira','2014-08-22','F',2,2,TRUE);
+
+-- Fardamentos
+INSERT INTO fardamento (tipo,tamanho)
+VALUES
+('Camisa','M'),('Calça','G'),('Bota','42');
+
+-- Entrega de Fardas
+INSERT INTO farda_aluno (id_aluno,id_farda,data_entrega)
+VALUES
+(1,1,'2025-05-26'),(2,2,'2025-05-26');
+
+-- Clubes
+INSERT INTO clube (nome,descricao)
+VALUES
+('Xadrez','Clube de Xadrez'),('Futebol','Clube de Futebol');
+
+-- Aluno x Clube
+INSERT INTO clube_aluno (id_aluno,id_clube,data_ingresso)
+VALUES
+(1,1,'2025-03-01'),(2,2,'2025-03-05');
+
+-- Notas e Disciplinas
+INSERT INTO nota (descricao,peso,valor) VALUES
+('Prova Final',0.6,0),( 'Trabalho',0.4,0);
+INSERT INTO disciplina (nome,carga_horaria,descricao,id_clube) VALUES
+('Matemática',120,'Matemática Básica',NULL),
+('Educação Física',60,'Atividades físicas',2);
+
+-- Lançamentos de Notas
+INSERT INTO lancamento_nota (id_aluno,id_disciplina,id_nota,valor,data_lanc)
+VALUES
+(1,1,1,8.5,'2025-05-20'),(2,2,2,7.0,'2025-05-21');
+
+-- Presenças
+INSERT INTO presenca (id_aluno,id_turma,data_aula,presente)
+VALUES
+(1,1,'2025-05-22',TRUE),(2,2,'2025-05-22',FALSE);
+
+-- Matrículas
+INSERT INTO matricula (id_aluno,id_turma,ano,data_matricula,status)
+VALUES
+(1,1,'2025','2025-01-10','Ativo'),(2,2,'2025','2025-01-12','Ativo');
+use bdcolegiomilitar
+SELECT a.id_aluno, a.nome, t.nome_turma, r.nome AS responsavel
+FROM aluno a
+JOIN turma t ON a.id_turma = t.id_turma
+JOIN responsavel r ON a.id_responsavel = r.id_responsavel
+
+
+SELECT t.nome_turma, COUNT(*) AS total_alunos
+FROM aluno a
+JOIN turma t ON a.id_turma = t.id_turma
+WHERE a.ativo = TRUE
+GROUP BY t.nome_turma;
+
+SELECT fa.id_farda_aluno, a.nome, f.tipo, fa.data_entrega
+FROM farda_aluno fa
+JOIN aluno a ON fa.id_aluno = a.id_aluno
+JOIN fardamento f ON fa.id_farda = f.id_farda;
+
+SELECT id_diretor, nome, cargo_militar
+FROM diretor
+WHERE ativo = TRUE;
+
+
+SELECT d.nome AS disciplina, AVG(ln.valor) AS media
+FROM lancamento_nota ln
+JOIN disciplina d ON ln.id_disciplina = d.id_disciplina
+GROUP BY d.nome;
+
+
+SELECT t.nome_turma, SUM(CASE WHEN p.presente THEN 1 ELSE 0 END) AS presencas
+FROM presenca p
+JOIN turma t ON p.id_turma = t.id_turma
+GROUP BY t.nome_turma;
